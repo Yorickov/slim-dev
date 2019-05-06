@@ -1,0 +1,39 @@
+{
+  "name": "slim/dev",
+  "type": "project",
+  "description": "",
+  "authors": [
+    {
+      "name": "yorickov",
+      "email": "yorickov@gmail.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "scripts": {
+    "phpcs": "phpcs",
+    "phpcbf": "phpcbf",
+    "phpunit": "phpunit",
+    "test": "phpunit tests"
+  },
+  "autoload": {
+    "psr-4": {
+      "Slim\\Dev\\": "src",
+      "Slim\\Dev\\Tests\\": "tests"
+    }
+  },
+  "require": {
+    "slim/slim": "^3.12",
+    "slim/php-view": "dev-master",
+    "danielstjules/stringy": "dev-master",
+    "tightenco/collect": "dev-master",
+    "nesbot/carbon": "dev-master",
+    "slim/twig-view": "dev-master",
+    "monolog/monolog": "^2.0@dev"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.4",
+    "phpunit/phpunit": "^8.2@dev",
+    "guzzlehttp/guzzle": "~6.0",
+    "symfony/process": "^4.3@dev"
+  }
+}

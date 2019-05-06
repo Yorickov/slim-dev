@@ -1,0 +1,5 @@
+/vendor/
+*.swo
+*.swp
+*.cache
+/var/
