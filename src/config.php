@@ -3,14 +3,14 @@
 return [
     'app' => [
         'settings' => [
-            'displayErrorDetails' => true, // set to false in production
+            'displayErrorDetails' => true, // in prod: false
             'addContentLengthHeader' => false
         ]
     ],
     'renderer' => [
         'path' => __DIR__ . '/../templates/',
         'options' => [
-            'cache' => __DIR__ . '/../var/cache'
+            false // in prod: 'cache' => __DIR__ . '/../var/cache'
         ]
     ],
     'logger' => [

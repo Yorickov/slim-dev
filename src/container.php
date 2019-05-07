@@ -21,4 +21,8 @@ return function(App $app, $config) {
         $logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
         return $logger;
     };
+    
+    $container['flash'] = function () {
+        return new \Slim\Flash\Messages();
+    };
 };

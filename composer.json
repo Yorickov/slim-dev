@@ -28,7 +28,8 @@
     "tightenco/collect": "dev-master",
     "nesbot/carbon": "dev-master",
     "slim/twig-view": "dev-master",
-    "monolog/monolog": "^2.0@dev"
+    "monolog/monolog": "^2.0@dev",
+    "slim/flash": "dev-master"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^3.4",

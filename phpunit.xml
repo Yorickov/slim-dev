@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<phpunit colors="true">
+  <logging>
+    <log type="coverage-clover" target="var/logs/clover.xml"/>
+  </logging>
+   <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src</directory>
+        </whitelist>
+    </filter>
+</phpunit>
+
+<!-- <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="vendor/autoload.php"
   backupGlobals="false"
   backupStaticAttributes="false"
@@ -9,4 +21,4 @@
   convertWarningsToExceptions="true"
   processIsolation="false"
   stopOnFailure="true">
-</phpunit>
+</phpunit> -->

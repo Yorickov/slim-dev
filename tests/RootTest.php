@@ -29,7 +29,8 @@ class RootTest extends TestCase
     {
         $expected = 'Slim';
         $response = $this->client->get('/');
-        // $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(200, $response->getStatusCode());
+        
         $body = $response->getBody()->getContents();
         $this->assertStringContainsString($expected, $body);
     }

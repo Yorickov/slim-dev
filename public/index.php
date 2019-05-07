@@ -8,6 +8,8 @@ if (file_exists($autoloadPath1)) {
     require_once $autoloadPath2;
 }
 
+session_start();
+
 $config = require __DIR__ . '/../src/config.php';
 $app = new \Slim\App($config['app']);
 
