@@ -7,5 +7,6 @@
 
 ### Features
 - Slim 3
-- Laravel: Collection, etc.
+- Twig
+- Laravel/Symfony-libs (collection, etc).
 - testing: phpunit, http-client

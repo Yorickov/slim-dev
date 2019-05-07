@@ -1,0 +1,20 @@
+{% extends 'layouts/app.phtml' %}
+
+{% block content %}
+  <div class="container my-5 py-5">
+    <div class="row">
+      <div class="col-12 col-lg-10 col-xl-8">
+        {% if posts is not empty %}
+          {% for post in posts %}
+            <div class="my-3">
+              <a class="list-item" href="{{ path_for('post#show', { 'slug' : post.slug }) }}">{{ post.name }}</a>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+    <div class="row justify-content-around">
+      <a href="?page={{ prev }}">Prev</a> <a href="?page={{ next }}">Next</a>
+    </div>
+  </div>
+{% endblock %}

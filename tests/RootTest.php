@@ -21,7 +21,8 @@ class RootTest extends TestCase
     public function setUp(): void
     {
         $this->client = new \GuzzleHttp\Client([
-            'base_uri' => 'http://localhost:8000'
+            'base_uri' => 'http://localhost:8000',
+            'cookies' => true
         ]);
     }
     
@@ -33,5 +34,26 @@ class RootTest extends TestCase
         
         $body = $response->getBody()->getContents();
         $this->assertStringContainsString($expected, $body);
+    }
+
+    public function testPosts()
+    {
+        $this->client->get('/');
+        $response = $this->client->get('/posts');
+        $this->assertEquals(200, $response->getStatusCode());
+        $body = $response->getBody()->getContents();
+
+        $this->assertStringContainsString('Itaque quibusdam', $body);
+        $this->assertStringNotContainsString('Est placeat rerum', $body);
+
+        $response2 = $this->client->get('/posts?page=2');
+        $this->assertEquals(200, $response->getStatusCode());
+        
+        $body2 = $response2->getBody()->getContents();
+        $this->assertStringContainsString('?page=1', $body2);
+        $this->assertStringContainsString('?page=3', $body2);
+
+        $this->assertStringNotContainsString('Itaque quibusdam tempora', $body2);
+        $this->assertStringContainsString('Est placeat rerum', $body2);
     }
 }
