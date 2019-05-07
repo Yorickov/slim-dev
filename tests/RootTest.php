@@ -5,6 +5,10 @@ namespace Slim\Hx\Tests;
 use \PHPUnit\Framework\TestCase;
 use \Symfony\Component\Process\Process;
 
+use GuzzleHttp\Exception\ClientException; // for 400-level errors
+use GuzzleHttp\Exception\ServerException; // for 500-level errors
+use GuzzleHttp\Exception\BadResponseException; // for both (it's their superclass)
+
 class RootTest extends TestCase
 {
     private $client;
@@ -28,32 +32,75 @@ class RootTest extends TestCase
     
     public function testRoot()
     {
-        $expected = 'Slim';
         $response = $this->client->get('/');
         $this->assertEquals(200, $response->getStatusCode());
-        
+
+        $response = $this->client->get('/posts?page=2');
         $body = $response->getBody()->getContents();
-        $this->assertStringContainsString($expected, $body);
+        $this->assertStringContainsString('?page=1', $body);
+        $this->assertStringContainsString('?page=3', $body);
     }
 
     public function testPosts()
     {
         $this->client->get('/');
-        $response = $this->client->get('/posts');
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->client->get('/posts');
+        $response = $this->client->get('/posts/new');
         $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('post[name]', $body);
+        $this->assertStringContainsString('post[body]', $body);
 
-        $this->assertStringContainsString('Itaque quibusdam', $body);
-        $this->assertStringNotContainsString('Est placeat rerum', $body);
+        $formParams = ['post' => ['name' => '', 'body' => '']];
+        $response = $this->client->post('/posts', [
+            /* 'debug' => true, */
+            'form_params' => $formParams,
+            'http_errors' => false
+        ]);
+        $this->assertEquals(422, $response->getStatusCode());
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString("Can not be blank", $body);
 
-        $response2 = $this->client->get('/posts?page=2');
-        $this->assertEquals(200, $response->getStatusCode());
+        $formParams = ['post' => ['name' => 'first', 'body' => 'last']];
+        $response = $this->client->post('/posts', [
+            /* 'debug' => true, */
+            'form_params' => $formParams
+        ]);
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('Post has been created', $body);
+        $this->assertStringContainsString("first", $body);
+
+        $formParams = ['post' => ['name' => 'second', 'body' => 'another']];
+        $response = $this->client->post('/posts', [
+            /* 'debug' => true, */
+            'form_params' => $formParams
+        ]);
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('Post has been created', $body);
+        $this->assertStringContainsString('first', $body);
+        $this->assertStringContainsString('second', $body);
+    }
+
+    public function testPost()
+    {
+        $formParams = ['post' => ['id' => 101, 'name' => 'first', 'body' => 'last']];
+        $response = $this->client->post('/posts', [
+            'form_params' => $formParams
+        ]);
+        $response = $this->client->get('/posts?page=2');
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('?page=1', $body);
+        $this->assertStringContainsString('?page=3', $body);
         
+        $response2 = $this->client->get('/posts/101');
         $body2 = $response2->getBody()->getContents();
-        $this->assertStringContainsString('?page=1', $body2);
-        $this->assertStringContainsString('?page=3', $body2);
+        $this->assertStringContainsString('last', $body2);
 
-        $this->assertStringNotContainsString('Itaque quibusdam tempora', $body2);
-        $this->assertStringContainsString('Est placeat rerum', $body2);
+        $idFalse = 102;
+        try {
+            $this->client->get("/posts/{$idFalse}");
+        } catch (ClientException $e) {
+            $response = $e->getResponse();
+            $this->assertEquals(404, $response->getStatusCode());
+        }
     }
 }

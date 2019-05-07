@@ -1,0 +1,30 @@
+{% extends 'layouts/app.phtml' %}
+
+{% block content %}
+<div class="container fluid">
+    <div class="row">
+        <div class="col-sm-8 mx-auto">
+            <h3 class="mb-4 mt-3 text-center">New Post</h3>
+                <form action="/posts" method="post">
+                    <div class="form-group">
+                        <label for="input_name">Title *</label>
+                        <input id="input_name" class="form-control" type="text" name="post[name]" value="{{ postData.name ?? '' }}">
+                        {% if errors.name %}
+                            <div class="form-control-feedback">{{ errors.name }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="input_body">Content *</label>
+                        <textarea id="input_body" class="form-control" type="text" rows="20" cols="80" name="post[body]">{{ postData.body ?? '' }}</textarea>
+                        {% if errors.body %}
+                            <div class="form-control-feedback">{{ errors.body }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-block btn-primary" type="submit" value="Create">Create</button>
+                    </div>
+                </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

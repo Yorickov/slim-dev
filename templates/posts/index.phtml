@@ -7,7 +7,7 @@
         {% if posts is not empty %}
           {% for post in posts %}
             <div class="my-3">
-              <a class="list-item" href="{{ path_for('post#show', { 'slug' : post.slug }) }}">{{ post.name }}</a>
+              <a class="list-item" href="{{ path_for('post#show', { 'id' : post.id }) }}">{{ post.name }}</a>
             </div>
           {% endfor %}
         {% endif %}
