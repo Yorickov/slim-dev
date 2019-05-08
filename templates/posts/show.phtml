@@ -1,14 +1,21 @@
 {% extends 'layouts/app.phtml' %}
 
 {% block content %}
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-12 col-lg-10 col-xl-8">
-        <div class="mb-5 pb-3">
-          <h1 class="mt-2 mb-4">{{ post.name }}</h1>
-          <div class="my-4">{{ post.body }}</div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-8">
+                <div class="mb-5 pb-3">
+                    <h1 class="mt-2 mb-4">{{ post.name }}</h1>
+                    <div class="my-4">{{ post.body }}</div>
+                    <div>
+                        <a href="{{ path_for('posts#edit', { 'id': post.id }) }}">Edit post</a>
+                    </div>
+                    <form action="{{ path_for('posts#destroy', { 'id': post.id } )}}" method="post">
+                        <input type="hidden" name="_METHOD" value="DELETE">
+                        <input type="submit" value="Delete">
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 {% endblock %}

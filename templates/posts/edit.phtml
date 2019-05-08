@@ -4,11 +4,12 @@
     <div class="container fluid">
         <div class="row">
             <div class="col-sm-8 mx-auto">
-                <h3 class="mb-4 mt-3 text-center">New Post</h3>
-                    <form action="{{ path_for('posts#create') }}" method="post">
+                <h3 class="mb-4 mt-3 text-center">Edit Post</h3>
+                    <form action="{{ path_for('posts#update', { 'id': post.id } )}}" method="post">
+                        <input type="hidden" name="_METHOD" value="PATCH">
                         {{ include('layouts/_form.phtml') }}
                         <div class="form-group">
-                            <button class="btn btn-block btn-primary" type="submit" value="create">Create</button>
+                            <button class="btn btn-block btn-primary" type="submit" value="update">Update</button>
                         </div>
                     </form>
             </div>

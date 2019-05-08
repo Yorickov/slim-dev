@@ -37,5 +37,7 @@ class Repository
             $item['id'] = uniqid();
         }
         $_SESSION['posts'][$item['id']] = $item;
+
+        return $item['id'];
     }
 }

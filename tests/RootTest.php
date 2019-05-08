@@ -6,8 +6,8 @@ use \PHPUnit\Framework\TestCase;
 use \Symfony\Component\Process\Process;
 
 use GuzzleHttp\Exception\ClientException; // for 400-level errors
-use GuzzleHttp\Exception\ServerException; // for 500-level errors
-use GuzzleHttp\Exception\BadResponseException; // for both (it's their superclass)
+// use GuzzleHttp\Exception\ServerException; - for 500-level errors
+// use GuzzleHttp\Exception\BadResponseException; - for both (it's their superclass)
 
 class RootTest extends TestCase
 {
@@ -43,8 +43,6 @@ class RootTest extends TestCase
 
     public function testPosts()
     {
-        $this->client->get('/');
-        $this->client->get('/posts');
         $response = $this->client->get('/posts/new');
         $body = $response->getBody()->getContents();
         $this->assertStringContainsString('post[name]', $body);
@@ -102,5 +100,83 @@ class RootTest extends TestCase
             $response = $e->getResponse();
             $this->assertEquals(404, $response->getStatusCode());
         }
+    }
+
+    public function testUpdatePost()
+    {
+        $nameValue = 'first';
+        $bodyValue = 'last';
+        $formParams = ['post' => ['name' => $nameValue, 'body' => $bodyValue]];
+        $response = $this->client->post('/posts', [
+            /* 'debug' => true, */
+            'form_params' => $formParams,
+            'allow_redirects' => false
+        ]);
+        $id = $response->getHeaderLine('X-ID');
+        $this->assertEquals(302, $response->getStatusCode());
+        $response = $this->client->get('/posts');
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString($nameValue, $body);
+
+        $url = "/posts/{$id}/edit";
+        $response = $this->client->get($url);
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString($nameValue, $body);
+
+        $newNameValue = 'new-name';
+        $formParams = ['post' => ['name' => $newNameValue, 'body' => $bodyValue]];
+        $response = $this->client->patch("/posts/{$id}", [
+            'form_params' => $formParams,
+            'allow_redirects' => false
+        ]);
+        $this->assertEquals(302, $response->getStatusCode());
+        $response = $this->client->get('/posts');
+        $body = $response->getBody()->getContents();
+        $this->assertStringNotContainsString($nameValue, $body);
+        $this->assertStringContainsString($newNameValue, $body);
+    }
+
+    public function testUpdateWithErrors()
+    {
+        $nameValue = 'first';
+        $bodyValue = 'last';
+        $formParams = ['post' => ['name' => $nameValue, 'body' => $bodyValue]];
+        $response = $this->client->post('/posts', [
+            /* 'debug' => true, */
+            'form_params' => $formParams,
+            'allow_redirects' => false
+        ]);
+        $id = $response->getHeaderLine('X-ID');
+        $this->assertEquals(302, $response->getStatusCode());
+
+        $formParams = ['post' => ['name' => '', 'body' => '']];
+        $response = $this->client->patch("/posts/{$id}", [
+            'form_params' => $formParams,
+            'allow_redirects' => false,
+            'http_errors' => false
+        ]);
+        $this->assertEquals(422, $response->getStatusCode());
+    }
+
+    public function testDeletePost()
+    {
+        $name = 'first';
+        $formParams = ['post' => ['name' => $name, 'body' => 'last']];
+        $response = $this->client->post('/posts', [
+            /* 'debug' => true, */
+            'form_params' => $formParams,
+            'allow_redirects' => false
+        ]);
+        $id = $response->getHeaderLine('X-ID');
+        $this->assertEquals(302, $response->getStatusCode());
+
+        $response = $this->client->delete("/posts/{$id}", [
+            /* 'debug' => true, */
+            'allow_redirects' => false
+        ]);
+        $this->assertEquals(302, $response->getStatusCode());
+        $response = $this->client->get('/posts');
+        $body = $response->getBody()->getContents();
+        $this->assertStringNotContainsString($name, $body);
     }
 }
