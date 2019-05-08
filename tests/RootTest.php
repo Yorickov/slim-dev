@@ -179,4 +179,80 @@ class RootTest extends TestCase
         $body = $response->getBody()->getContents();
         $this->assertStringNotContainsString($name, $body);
     }
+
+    public function testCreateUserLogin()
+    {
+        $response = $this->client->get('/');
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('Sign In', $body);
+
+        $formParams = [
+            'user' => [
+                'nickname' => 'admin',
+                'password' => 'secret'
+            ]
+        ];
+
+        $response1 = $this->client->get('/users/new');
+        $body1 = $response1->getBody()->getContents();
+        $this->assertStringContainsString('User', $body1);
+
+        $response2 = $this->client->get('/session/new');
+        $this->assertEquals(200, $response2->getStatusCode());
+
+        $this->client->post('/users', [
+            'form_params' => $formParams
+        ]);
+
+        $response3 = $this->client->post('/session', [
+            /* 'debug' => true, */
+            'form_params' => $formParams
+        ]);
+        $body3 = $response3->getBody()->getContents();
+        $this->assertStringContainsString('Sign Out', $body3);
+
+        $response4 = $this->client->delete('/session', []);
+        $body4 = $response4->getBody()->getContents();
+        $this->assertStringContainsString('Sign In', $body4);
+    }
+
+    public function testLoginFail()
+    {
+        $formParams = [
+            'user' => [
+                'nickname' => 'nick',
+                'password' => 'secret'
+            ]
+        ];
+        $formParamsFalseName = [
+            'user' => [
+                'nickname' => 'wrong',
+                'password' => 'secret'
+            ]
+        ];
+        $formParamsFalsePass = [
+            'user' => [
+                'nickname' => 'nick',
+                'password' => 'wrong'
+            ]
+        ];
+        $this->client->post('/users', [
+            'form_params' => $formParams
+        ]);
+
+        $response1 = $this->client->post('/session', [
+            /* 'debug' => true, */
+            'form_params' => $formParamsFalseName
+        ]);
+        $body1 = $response1->getBody()->getContents();
+        $this->assertStringContainsString('Wrong', $body1);
+
+        $response2 = $this->client->post('/session', [
+            /* 'debug' => true, */
+            'form_params' => $formParamsFalsePass
+        ]);
+        $body2 = $response2->getBody()->getContents();
+        $this->assertStringContainsString('Wrong', $body2);
+    }
+
 }

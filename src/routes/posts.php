@@ -3,10 +3,10 @@
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Slim\Dev\Validator;
+use Slim\Dev\PostValidator as Validator;
 
 // $posts = Slim\Dev\Generator::generate(100);
-$repo = new \Slim\Dev\Repository(); // add into Container
+$repo = new \Slim\Dev\PostRepository(); // add into Container
 
 return function (App $app) use ($repo) {
     $app->get('/posts', function (Request $request, Response $response) use ($repo) {

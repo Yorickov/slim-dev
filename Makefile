@@ -13,5 +13,5 @@ lint-fix:
 reload:
 	composer dump-autoload
 
-test: lint
+test:
 	composer run-script phpunit tests

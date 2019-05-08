@@ -2,7 +2,7 @@
 
 namespace Slim\Dev;
 
-class Validator
+class PostValidator
 {
     public function validate(array $course)
     {

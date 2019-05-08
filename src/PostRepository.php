@@ -2,7 +2,7 @@
 
 namespace Slim\Dev;
 
-class Repository
+class PostRepository
 {
     public function __construct()
     {

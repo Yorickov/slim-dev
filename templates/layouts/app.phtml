@@ -27,6 +27,23 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path_for('posts#new') }}">New post</a>
                 </li>
+            </ul>            
+            <ul class="navbar-nav">
+                {% if currentUser %}
+                    <li class="nav-item">
+                        <form action="{{ path_for('session#destroy' )}}" method="post">
+                            <input type="hidden" name="_METHOD" value="DELETE">
+                            <input type="submit" value="Sign Out">
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path_for('session#new') }}">Sign In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path_for('users#new') }}">Sign Up</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </nav>

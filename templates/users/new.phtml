@@ -1,0 +1,30 @@
+{% extends 'layouts/app.phtml' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row pt-5">
+            <div class="col-sm-4 mx-auto">
+                <h3 class="mb-4 mt-3 text-center">New User</h3>
+                <form action="{{ path_for('users#create') }}" method="post">
+                    <div class="form-group">
+                        <label for="input_nickname">Nickname *</label>
+                        <input id="input_nickname" class="form-control" type="text" name="user[nickname]" value="{{ userData.nickname ?? '' }}">
+                        {% if errors.nickname %}
+                            <div class="form-control-feedback">{{ errors.nickname }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="input_password">Password *</label>
+                        <input id="input_password" class="form-control" type="text" name="user[password]" value="{{ userData.password ?? '' }}">
+                        {% if errors.password %}
+                            <div class="form-control-feedback">{{ errors.password }}</div>
+                        {% endif %}
+                    </div>   
+                    <div class="form-group">
+                        <button class="btn btn-block btn-primary" type="submit" value="create">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

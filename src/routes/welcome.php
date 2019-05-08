@@ -11,6 +11,7 @@ return function (App $app) {
         $flash = $this->flash->getMessages();
 
         return $this->renderer->render($response, 'welcome/root.phtml', [
+            'currentUser' => $_SESSION['user'] ?? null, // add into middlware
             'flash' => $flash
         ]);
     })->setName('root');
