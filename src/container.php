@@ -25,4 +25,12 @@ return function(App $app, $config) {
     $container['flash'] = function () {
         return new \Slim\Flash\Messages();
     };
+
+    $container['postRepo'] = function () {
+        return new \Slim\Dev\Models\PostRepository();
+    };
+
+    $container['userRepo'] = function () {
+        return new \Slim\Dev\Models\UserRepository();
+    };
 };

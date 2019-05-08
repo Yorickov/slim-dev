@@ -16,6 +16,9 @@ $app = new \Slim\App($config['app']);
 $injectDeps = require __DIR__ . '/../src/container.php';
 $injectDeps($app, $config);
 
+// $middleware = require __DIR__ . '/../src/middleware.php';
+// $middleware($app);
+
 $appRoutes = require __DIR__ . '/../src/routes/index.php';
 $appRoutes($app);
 

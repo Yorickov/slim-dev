@@ -3,17 +3,15 @@
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Slim\Dev\PostValidator as Validator;
 
 // $posts = Slim\Dev\Generator::generate(100);
-$repo = new \Slim\Dev\PostRepository(); // add into Container
 
-return function (App $app) use ($repo) {
-    $app->get('/posts', function (Request $request, Response $response) use ($repo) {
+return function (App $app) {
+    $app->get('/posts', function (Request $request, Response $response) {
         // $this->flash->addMessageNow('Test', 'Now-message'); - instant Message
         $flash = $this->flash->getMessages();
         
-        $posts = $repo->all();
+        $posts = $this->postRepo->all();
         $page = $request->getQueryParam('page', 1);
         $per = $request->getQueryParam('per', 5);
         $offset = ($page - 1) * $per;
@@ -26,16 +24,17 @@ return function (App $app) use ($repo) {
         ]);
     })->setName('posts#index');
 
-    $app->get('/posts/new', function (Request $request, Response $response) use ($repo) {
+    $app->get('/posts/new', function (Request $request, Response $response) {
         $this->renderer->render($response, 'posts/new.phtml', [
             'postData' => [],
             'errors' => []
         ]);
     })->setName('posts#new');
 
-    $app->get('/posts/{id}', function (Request $request, Response $response, $args) use ($repo) {
-        $posts = $repo->all(); // find
-        $post = collect($posts)->firstWhere('id', $args['id']);
+    $app->get('/posts/{id}', function (Request $request, Response $response, $args) {
+        // $posts = $this->postRepo->all();
+        // $post = collect($posts)->firstWhere('id', $args['id']);
+        $post = $this->postRepo->find($args['id']);
         if (!$post) {
             $response = $response->withStatus(404);
             return $this->renderer->render($response, 'errors/404.phtml');
@@ -45,14 +44,12 @@ return function (App $app) use ($repo) {
         ]);
     })->setName('post#show');
 
-    $app->post('/posts', function (Request $request, Response $response) use ($repo) {
+    $app->post('/posts', function (Request $request, Response $response) {
         $postData = $request->getParsedBodyParam('post');
-    
-        $validator = new Validator();
-        $errors = $validator->validate($postData);
+        $errors = $this->postRepo->validate($postData);
     
         if (count($errors) === 0) {
-            $id = $repo->save($postData);
+            $id = $this->postRepo->save($postData);
             $this->flash->addMessage('success', 'Post has been created');
             return $response->withHeader('X-ID', $id)
                             ->withRedirect($this->router->pathFor('posts#index'));
@@ -64,8 +61,8 @@ return function (App $app) use ($repo) {
         ]);
     })->setName('posts#create');
 
-    $app->get('/posts/{id}/edit', function (Request $request, Response $response, $args) use ($repo) {
-        $post = $repo->find($args['id']);
+    $app->get('/posts/{id}/edit', function (Request $request, Response $response, $args) {
+        $post = $this->postRepo->find($args['id']);
         return $this->renderer->render($response, 'posts/edit.phtml', [
             'postData' => $post,
             'post' => $post,
@@ -73,17 +70,15 @@ return function (App $app) use ($repo) {
         ]);
     })->setName('posts#edit');
 
-    $app->patch('/posts/{id}', function (Request $request, Response $response, $args) use ($repo) {
-        $post = $repo->find($args['id']);
+    $app->patch('/posts/{id}', function (Request $request, Response $response, $args) {
+        $post = $this->postRepo->find($args['id']);
         $postData = $request->getParsedBodyParam('post');
-    
-        $validator = new Validator();
-        $errors = $validator->validate($postData);
+        $errors = $this->postRepo->validate($postData);
     
         if (count($errors) === 0) {
             $post['name'] = $postData['name'];
             $post['body'] = $postData['body'];
-            $repo->save($post);
+            $this->postRepo->save($post);
             $this->flash->addMessage('success', 'Post has been updated');
             return $response->withRedirect($this->router->pathFor('posts#index'));
         }
@@ -95,8 +90,8 @@ return function (App $app) use ($repo) {
         ]);
     })->setName('posts#update');
 
-    $app->delete('/posts/{id}', function (Request $request, Response $response, $args) use ($repo) {
-        $repo->destroy($args['id']);
+    $app->delete('/posts/{id}', function (Request $request, Response $response, $args) {
+        $this->postRepo->destroy($args['id']);
         $this->flash->addMessage('success', 'Post has been removed');
         return $response->withRedirect($this->router->pathFor('posts#index'));
     })->setName('posts#destroy');

@@ -1,6 +1,6 @@
 <?php
 
-namespace Slim\Dev;
+namespace Slim\Dev\Models;
 
 class UserRepository
 {
@@ -40,5 +40,19 @@ class UserRepository
         
         $_SESSION['users'][$item['id']] = $item;
         return $item['id'];
+    }
+
+    public function validate(array $user)
+    {
+        $errors = [];
+        if ($user['nickname'] == '') {
+            $errors['nickname'] = "Can not be blank";
+        }
+
+        if (empty($user['password'])) {
+            $errors['password'] = "Can not be blank";
+        }
+
+        return $errors;
     }
 }

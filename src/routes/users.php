@@ -3,11 +3,8 @@
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Slim\Dev\UserValidator as Validator;
 
-$repo = new \Slim\Dev\UserRepository();
-
-return function (App $app) use ($repo) {
+return function (App $app) {
     $app->get('/users/new', function (Request $request, Response $response) {
         $this->renderer->render($response, 'users/new.phtml', [
             'userData' => [],
@@ -15,14 +12,12 @@ return function (App $app) use ($repo) {
         ]);
     })->setName('users#new');
 
-    $app->post('/users', function (Request $request, Response $response) use ($repo) {
+    $app->post('/users', function (Request $request, Response $response) {
         $userData = $request->getParsedBodyParam('user');
-    
-        $validator = new Validator();
-        $errors = $validator->validate($userData);
+        $errors = $this->userRepo->validate($userData);
     
         if (count($errors) === 0) {
-            $userId = $repo->save($userData);
+            $userId = $this->userRepo->save($userData);
             $this->flash->addMessage('success', 'User has been created');
             return $response->withHeader('X-USERID', $userId)
                             ->withRedirect($this->router->pathFor('posts#index'));
@@ -41,9 +36,9 @@ return function (App $app) use ($repo) {
         ]);
     })->setName('session#new');
     
-    $app->post('/session', function ($request, $response) use ($repo) {
+    $app->post('/session', function ($request, $response) {
         $userData = $request->getParsedBodyParam('user');
-        $users = $repo->all(); // find
+        $users = $this->userRepo->all();
 
         $user = collect($users)->first(function ($user) use ($userData) {
             return $user['nickname'] == $userData['nickname']

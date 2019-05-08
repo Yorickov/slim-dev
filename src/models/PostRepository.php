@@ -1,6 +1,6 @@
 <?php
 
-namespace Slim\Dev;
+namespace Slim\Dev\Models;
 
 class PostRepository
 {
@@ -39,5 +39,19 @@ class PostRepository
         $_SESSION['posts'][$item['id']] = $item;
 
         return $item['id'];
+    }
+
+    public function validate(array $post)
+    {
+        $errors = [];
+        if ($post['name'] == '') {
+            $errors['name'] = "Can not be blank";
+        }
+
+        if (empty($post['body'])) {
+            $errors['body'] = "Can not be blank";
+        }
+
+        return $errors;
     }
 }
