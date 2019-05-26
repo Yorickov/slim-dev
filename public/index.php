@@ -8,13 +8,32 @@ if (file_exists($autoloadPath1)) {
     require_once $autoloadPath2;
 }
 
+$config = require __DIR__ . '/../src/config.php';
+
+try {
+    $ddl = new \Slim\Dev\Services\DDLManager('sqlite::memory:', null, null, $config['db']);
+    $ddl->createTable('posts', [
+        'id' => 'integer',
+        'name' => 'string',
+        'body' => 'string'
+    ]);
+    $ddl->createTable('users', [
+        'id' => 'integer',
+        'passwordDigest' => 'string',
+        'nickname' => 'string'
+    ]);
+    $dbh = $ddl->getConnection();
+} catch (DOException $e) {
+    echo "Error!: {$e->getMessage()}";
+    die();
+}
+
 session_start();
 
-$config = require __DIR__ . '/../src/config.php';
 $app = new \Slim\App($config['app']);
 
 $injectDeps = require __DIR__ . '/../src/container.php';
-$injectDeps($app, $config);
+$injectDeps($app, $config, $dbh);
 
 // $middleware = require __DIR__ . '/../src/middleware.php';
 // $middleware($app);

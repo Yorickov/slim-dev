@@ -1,6 +1,6 @@
 <?php
 
-namespace Slim\Hx\Tests;
+namespace Slim\Dev\Tests;
 
 use \PHPUnit\Framework\TestCase;
 use \Symfony\Component\Process\Process;
@@ -20,6 +20,11 @@ class RootTest extends TestCase
         self::$process->start();
 
         usleep(100000);
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        self::$process->stop();
     }
 
     public function setUp(): void
@@ -80,18 +85,21 @@ class RootTest extends TestCase
 
     public function testPost()
     {
-        $formParams = ['post' => ['id' => 101, 'name' => 'first', 'body' => 'last']];
+        $formParams = ['post' => ['name' => 'pete', 'body' => 'mike']];
         $response = $this->client->post('/posts', [
-            'form_params' => $formParams
+            'form_params' => $formParams,
+            'allow_redirects' => false
         ]);
+        $id = $response->getHeaderLine('X-ID');
+
         $response = $this->client->get('/posts?page=2');
         $body = $response->getBody()->getContents();
         $this->assertStringContainsString('?page=1', $body);
         $this->assertStringContainsString('?page=3', $body);
         
-        $response2 = $this->client->get('/posts/101');
+        $response2 = $this->client->get("/posts/{$id}");
         $body2 = $response2->getBody()->getContents();
-        $this->assertStringContainsString('last', $body2);
+        $this->assertStringContainsString('mike', $body2);
 
         $idFalse = 102;
         try {
@@ -104,8 +112,8 @@ class RootTest extends TestCase
 
     public function testUpdatePost()
     {
-        $nameValue = 'first';
-        $bodyValue = 'last';
+        $nameValue = 'someName';
+        $bodyValue = 'blog';
         $formParams = ['post' => ['name' => $nameValue, 'body' => $bodyValue]];
         $response = $this->client->post('/posts', [
             /* 'debug' => true, */
@@ -138,8 +146,8 @@ class RootTest extends TestCase
 
     public function testUpdateWithErrors()
     {
-        $nameValue = 'first';
-        $bodyValue = 'last';
+        $nameValue = 'wrong';
+        $bodyValue = 'err';
         $formParams = ['post' => ['name' => $nameValue, 'body' => $bodyValue]];
         $response = $this->client->post('/posts', [
             /* 'debug' => true, */
@@ -160,8 +168,7 @@ class RootTest extends TestCase
 
     public function testDeletePost()
     {
-        $name = 'first';
-        $formParams = ['post' => ['name' => $name, 'body' => 'last']];
+        $formParams = ['post' => ['name' => 'jean', 'body' => 'broady']];
         $response = $this->client->post('/posts', [
             /* 'debug' => true, */
             'form_params' => $formParams,
@@ -177,7 +184,7 @@ class RootTest extends TestCase
         $this->assertEquals(302, $response->getStatusCode());
         $response = $this->client->get('/posts');
         $body = $response->getBody()->getContents();
-        $this->assertStringNotContainsString($name, $body);
+        $this->assertStringContainsString('Post has been removed', $body);
     }
 
     public function testCreateUserLogin()
@@ -193,27 +200,29 @@ class RootTest extends TestCase
             ]
         ];
 
-        $response1 = $this->client->get('/users/new');
-        $body1 = $response1->getBody()->getContents();
-        $this->assertStringContainsString('User', $body1);
+        $response = $this->client->get('/users/new');
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('User', $body);
 
-        $response2 = $this->client->get('/session/new');
-        $this->assertEquals(200, $response2->getStatusCode());
+        $response = $this->client->get('/session/new');
+        $this->assertEquals(200, $response->getStatusCode());
 
-        $this->client->post('/users', [
+        $response = $this->client->post('/users', [
             'form_params' => $formParams
         ]);
-
-        $response3 = $this->client->post('/session', [
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('User has been created', $body);
+        
+        $response = $this->client->post('/session', [
             /* 'debug' => true, */
             'form_params' => $formParams
         ]);
-        $body3 = $response3->getBody()->getContents();
-        $this->assertStringContainsString('Sign Out', $body3);
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('Sign Out', $body);
 
-        $response4 = $this->client->delete('/session', []);
-        $body4 = $response4->getBody()->getContents();
-        $this->assertStringContainsString('Sign In', $body4);
+        $response = $this->client->delete('/session', []);
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('Sign In', $body);
     }
 
     public function testLoginFail()
@@ -240,19 +249,18 @@ class RootTest extends TestCase
             'form_params' => $formParams
         ]);
 
-        $response1 = $this->client->post('/session', [
+        $response = $this->client->post('/session', [
             /* 'debug' => true, */
             'form_params' => $formParamsFalseName
         ]);
-        $body1 = $response1->getBody()->getContents();
-        $this->assertStringContainsString('Wrong', $body1);
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('Wrong', $body);
 
-        $response2 = $this->client->post('/session', [
+        $response = $this->client->post('/session', [
             /* 'debug' => true, */
             'form_params' => $formParamsFalsePass
         ]);
-        $body2 = $response2->getBody()->getContents();
-        $this->assertStringContainsString('Wrong', $body2);
+        $body = $response->getBody()->getContents();
+        $this->assertStringContainsString('Wrong', $body);
     }
-
 }

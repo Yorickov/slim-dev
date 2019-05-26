@@ -17,5 +17,10 @@ return [
         'name' => 'app',
         'path' => __DIR__ . '/../var/logs/app.log',
         'level' => \Monolog\Logger::DEBUG
+    ],
+    'db' => [
+        \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+        \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+        \PDO::ATTR_PERSISTENT => true
     ]
 ];

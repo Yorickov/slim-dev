@@ -2,9 +2,9 @@
 
 use Slim\App;
 
-return function(App $app, $config) {
+return function (App $app, $config, \PDO $pdo) {
     $container = $app->getContainer();
-
+    // var_dump ($pdo);
     $container['renderer'] = function ($c) use ($config) {
         $settings = $config['renderer'];
         $renderer = new \Slim\Views\Twig($settings['path'], $settings['options']);
@@ -32,5 +32,13 @@ return function(App $app, $config) {
 
     $container['userRepo'] = function () {
         return new \Slim\Dev\Models\UserRepository();
+    };
+
+    $container['postMapper'] = function () use ($pdo) {
+        return new \Slim\Dev\Services\PostMapper($pdo);
+    };
+
+    $container['userMapper'] = function () use ($pdo) {
+        return new \Slim\Dev\Services\UserMapper($pdo);
     };
 };

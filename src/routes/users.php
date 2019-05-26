@@ -3,6 +3,7 @@
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use Slim\Dev\Models\User;
 
 return function (App $app) {
     $app->get('/users/new', function (Request $request, Response $response) {
@@ -14,12 +15,14 @@ return function (App $app) {
 
     $app->post('/users', function (Request $request, Response $response) {
         $userData = $request->getParsedBodyParam('user');
-        $errors = $this->userRepo->validate($userData);
+        $errors = $this->userMapper->validate($userData);
     
         if (count($errors) === 0) {
-            $userId = $this->userRepo->save($userData);
+            $user = new User($userData['nickname'], $userData['password']);
+
+            $id = $this->userMapper->save($user);
             $this->flash->addMessage('success', 'User has been created');
-            return $response->withHeader('X-USERID', $userId)
+            return $response->withHeader('X-USERID', $id)
                             ->withRedirect($this->router->pathFor('posts#index'));
         }
     
@@ -38,7 +41,7 @@ return function (App $app) {
     
     $app->post('/session', function ($request, $response) {
         $userData = $request->getParsedBodyParam('user');
-        $users = $this->userRepo->all();
+        $users = $this->userMapper->all();
 
         $user = collect($users)->first(function ($user) use ($userData) {
             return $user['nickname'] == $userData['nickname']
@@ -50,7 +53,7 @@ return function (App $app) {
         } else {
             $this->flash->addMessage('error', 'Wrong password or name');
         }
-            return $response->withRedirect('/');
+        return $response->withRedirect('/');
     })->setName('session#create');
     
     $app->delete('/session', function (Request $request, Response $response) {

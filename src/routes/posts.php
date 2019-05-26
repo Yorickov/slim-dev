@@ -3,15 +3,14 @@
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
-
-// $posts = Slim\Dev\Generator::generate(100);
+use Slim\Dev\Models\Post;
 
 return function (App $app) {
     $app->get('/posts', function (Request $request, Response $response) {
         // $this->flash->addMessageNow('Test', 'Now-message'); - instant Message
         $flash = $this->flash->getMessages();
         
-        $posts = $this->postRepo->all();
+        $posts = $this->postMapper->all();
         $page = $request->getQueryParam('page', 1);
         $per = $request->getQueryParam('per', 5);
         $offset = ($page - 1) * $per;
@@ -32,9 +31,7 @@ return function (App $app) {
     })->setName('posts#new');
 
     $app->get('/posts/{id}', function (Request $request, Response $response, $args) {
-        // $posts = $this->postRepo->all();
-        // $post = collect($posts)->firstWhere('id', $args['id']);
-        $post = $this->postRepo->find($args['id']);
+        $post = $this->postMapper->findById($args['id']);
         if (!$post) {
             $response = $response->withStatus(404);
             return $this->renderer->render($response, 'errors/404.phtml');
@@ -46,10 +43,13 @@ return function (App $app) {
 
     $app->post('/posts', function (Request $request, Response $response) {
         $postData = $request->getParsedBodyParam('post');
-        $errors = $this->postRepo->validate($postData);
+        $errors = $this->postMapper->validate($postData);
     
         if (count($errors) === 0) {
-            $id = $this->postRepo->save($postData);
+            // $post = new Post(...array_values($postData));
+            $post = new Post($postData['name'], $postData['body']);
+
+            $id = $this->postMapper->save($post);
             $this->flash->addMessage('success', 'Post has been created');
             return $response->withHeader('X-ID', $id)
                             ->withRedirect($this->router->pathFor('posts#index'));
@@ -62,7 +62,7 @@ return function (App $app) {
     })->setName('posts#create');
 
     $app->get('/posts/{id}/edit', function (Request $request, Response $response, $args) {
-        $post = $this->postRepo->find($args['id']);
+        $post = $this->postMapper->findById($args['id']);
         return $this->renderer->render($response, 'posts/edit.phtml', [
             'postData' => $post,
             'post' => $post,
@@ -71,16 +71,20 @@ return function (App $app) {
     })->setName('posts#edit');
 
     $app->patch('/posts/{id}', function (Request $request, Response $response, $args) {
-        $post = $this->postRepo->find($args['id']);
+        $post = $this->postMapper->findById($args['id']);
         $postData = $request->getParsedBodyParam('post');
-        $errors = $this->postRepo->validate($postData);
+        $errors = $this->postMapper->validate($postData);
     
         if (count($errors) === 0) {
-            $post['name'] = $postData['name'];
-            $post['body'] = $postData['body'];
-            $this->postRepo->save($post);
+            // $post['name'] = $postData['name'];
+            // $post['body'] = $postData['body'];
+            $updatedPost = new Post($postData['name'], $postData['body']);
+            $updatedPost->setId($post['id']);
+            $id = $this->postMapper->save($updatedPost);
+
             $this->flash->addMessage('success', 'Post has been updated');
-            return $response->withRedirect($this->router->pathFor('posts#index'));
+            return $response->withHeader('X-ID', $id)
+                            ->withRedirect($this->router->pathFor('posts#index'));
         }
 
         return $this->renderer->render($response->withStatus(422), 'posts/edit.phtml', [
@@ -91,7 +95,7 @@ return function (App $app) {
     })->setName('posts#update');
 
     $app->delete('/posts/{id}', function (Request $request, Response $response, $args) {
-        $this->postRepo->destroy($args['id']);
+        $this->postMapper->destroy($args['id']);
         $this->flash->addMessage('success', 'Post has been removed');
         return $response->withRedirect($this->router->pathFor('posts#index'));
     })->setName('posts#destroy');
